@@ -7,18 +7,20 @@
           GitHub リポジトリを検索して Issues を見ることができます。
         </p>
 
-        <el-input
+        <el-autocomplete
           v-model="input"
+          class="inline-input"
+          :fetch-suggestions="querySearch"
           placeholder="rails/rails"
-          class="input-with-select"
+          :trigger-on-focus="false"
         >
           <el-button slot="append" icon="el-icon-search"></el-button>
-        </el-input>
+        </el-autocomplete>
 
         <div class="card-list">
           <el-card v-for="card in cardList" :key="card.index" class="box-card">
             <div slot="header">
-              <span> user/repo{{ card.title }} </span>
+              <span> {{ card.title }} </span>
 
               <el-button
                 type="danger"
@@ -48,6 +50,7 @@
 export default {
   data() {
     return {
+      repoList: [],
       input: '',
       cardList: [
         {
@@ -106,6 +109,22 @@ export default {
     }
   },
   methods: {
+    querySearch(queryString, cb) {
+      this.repoList = this.cardList.map((repo) => repo.title)
+      const results = queryString
+        ? this.repoList.filter((repo) => this.createFilter(repo, queryString))
+        : this.repoList
+
+      cb(this.createResults(results))
+    },
+    createFilter(repo, queryString) {
+      return repo.includes(queryString.toLowerCase())
+    },
+    createResults(results) {
+      return results.map((result) => {
+        return { value: result }
+      })
+    },
     open(issues) {
       this.$alert(issues.description, issues.title)
     },
@@ -142,7 +161,7 @@ p {
   text-align: center;
 }
 
-.el-input-group {
+.el-autocomplete {
   width: 80%;
   margin: 20px auto 0;
 

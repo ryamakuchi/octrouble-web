@@ -1,0 +1,16 @@
+// Element UI で上書きしたい CSS を記述する
+
+.el-message-box {
+  @media screen and (max-width: 768px) {
+    width: 100%;
+    max-height: 80vh;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+  }
+}
+
+.el-message-box__message p {
+  word-wrap: break-word;
+}

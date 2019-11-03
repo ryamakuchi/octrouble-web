@@ -14,7 +14,11 @@
           placeholder="rails/rails"
           :trigger-on-focus="false"
         >
-          <el-button slot="append" icon="el-icon-search"></el-button>
+          <el-button
+            slot="append"
+            icon="el-icon-search"
+            @click="search"
+          ></el-button>
         </el-autocomplete>
 
         <div class="card-list">
@@ -50,8 +54,8 @@
 export default {
   data() {
     return {
-      repoList: [],
       input: '',
+      cardTitleList: [],
       cardList: [
         {
           title: 'user/repo1',
@@ -110,20 +114,55 @@ export default {
   },
   methods: {
     querySearch(queryString, cb) {
-      this.repoList = this.cardList.map((repo) => repo.title)
+      this.cardTitleList = this.cardList.map((card) => card.title)
       const results = queryString
-        ? this.repoList.filter((repo) => this.createFilter(repo, queryString))
-        : this.repoList
+        ? this.cardTitleList.filter((cardTitle) =>
+            this.createFilter(cardTitle, queryString)
+          )
+        : this.cardTitle
 
       cb(this.createResults(results))
     },
-    createFilter(repo, queryString) {
-      return repo.includes(queryString.toLowerCase())
+    createFilter(cardTitle, queryString) {
+      return !!cardTitle.toLowerCase().includes(queryString.toLowerCase())
     },
     createResults(results) {
       return results.map((result) => {
         return { value: result }
       })
+    },
+    search() {
+      const applicableCard = this.checkRepo()
+
+      if (applicableCard !== null) {
+        this.cardList = this.cardList.filter(
+          (card) => card.title !== applicableCard.title
+        )
+        this.cardList.push(applicableCard)
+      } else {
+        this.cardList.push({
+          title: this.input,
+          issues: [
+            {
+              title: 'issue title hoge',
+              description: 'Lorem ipsum dolor sit amet'
+            },
+            {
+              title: 'issue title fuga',
+              description: 'Lorem ipsum dolor sit amet'
+            }
+          ]
+        })
+      }
+    },
+    checkRepo() {
+      const result = this.cardList.filter((card) => card.title === this.input)
+
+      if (result.length !== 0) {
+        return result[0]
+      } else {
+        return null
+      }
     },
     open(issues) {
       this.$alert(issues.description, issues.title)
